@@ -229,6 +229,37 @@ export default function NewOrder() {
     setOrderItems(updatedItems);
   };
 
+  const handleQuantityInputChange = (index, value) => {
+    // Permitir que el usuario escriba, pero validar que sea un número entero positivo
+    const numValue = parseInt(value, 10);
+    
+    // Si está vacío, dejar que lo escriba (para permitir borrar y escribir de nuevo)
+    if (value === '') {
+      const updatedItems = [...orderItems];
+      updatedItems[index].cantidad = '';
+      setOrderItems(updatedItems);
+      return;
+    }
+    
+    // Validar que sea un número entero válido
+    if (!isNaN(numValue) && numValue > 0) {
+      const updatedItems = [...orderItems];
+      updatedItems[index].cantidad = numValue;
+      setOrderItems(updatedItems);
+    }
+    // Si no es válido, simplemente no actualizar
+  };
+
+  const handleQuantityInputBlur = (index) => {
+    const updatedItems = [...orderItems];
+    
+    // Si el campo está vacío o es inválido al perder el foco, restaurar el valor anterior    
+    if (!updatedItems[index].cantidad || updatedItems[index].cantidad === '') {
+      updatedItems[index].cantidad = 1;
+      setOrderItems(updatedItems);
+    }
+  };
+
   const handleSubmitOrder = async () => {
     try {
       setIsSubmitting(true);
@@ -414,7 +445,14 @@ export default function NewOrder() {
                           >
                             -
                           </button>
-                          <span className="w-10 text-center">{item.cantidad}</span>
+                          <input
+                            type="number"
+                            value={item.cantidad}
+                            onChange={(e) => handleQuantityInputChange(index, e.target.value)}
+                            onBlur={() => handleQuantityInputBlur(index)}
+                            className="w-12 text-center border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            min="1"
+                          />
                           <button
                             onClick={() => handleUpdateQuantity(index, item.cantidad + 1)}
                             className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-r-md"
