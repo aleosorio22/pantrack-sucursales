@@ -57,7 +57,7 @@ export default function Login() {
               className="w-full h-full object-cover"
             />
           </div>
-          <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">Industrias El Ángel</h1>
+          <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">Industrias El Angel</h1>
           <p className="text-white/70 text-lg mb-8">Sistema interno de administración y gestión</p>
 
           {/* Información relevante para empleados */}
@@ -82,7 +82,7 @@ export default function Login() {
           <div className="text-white/60 text-sm">
             <p>Si tiene problemas para acceder, contacte al</p>
             <p>
-              departamento de sistemas: <span className="text-primary">sistemas@elangel.com</span>
+              departamento de sistemas: <span className="text-primary">alejandroosorio022@gmail.com</span>
             </p>
           </div>
         </div>
