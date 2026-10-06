@@ -25,3 +25,9 @@ export function formatDateForInput(date) {
 
   return [year, month, day].join('-');
 }
+
+// Mueve una fecha (YYYY-MM-DD) N días hacia adelante o atrás
+export function shiftDate(dateString, days) {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return formatDateForInput(new Date(Date.UTC(year, month - 1, day + days)));
+}
