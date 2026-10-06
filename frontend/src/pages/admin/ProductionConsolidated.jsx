@@ -4,7 +4,7 @@ import OrderService from '../../services/OrderService';
 import { formatDateForInput } from '../../utils/dateUtils';
 import usePDFGenerator from '../../hooks/usePDFGenerator';
 import { toast } from 'react-toastify';
-import { FiArrowLeft } from 'react-icons/fi';
+import { FiSearch, FiPackage, FiLayers, FiBox, FiInbox } from 'react-icons/fi';
 
 // Componentes
 import Header from './components/production/Header';
@@ -21,6 +21,7 @@ const ProductionConsolidated = () => {
     location.state?.selectedDate || formatDateForInput(new Date())
   );
   const [updatingProduct, setUpdatingProduct] = useState(false);
+  const [search, setSearch] = useState('');
 
   // Efecto para actualizar la fecha cuando cambia en la ubicación
   useEffect(() => {
@@ -69,6 +70,35 @@ const ProductionConsolidated = () => {
   }, [data]);
 
   const { generatePDF, generatingPDF } = usePDFGenerator(groupedData, dateFilter);
+
+  // Categorías filtradas por búsqueda; al buscar se ocultan los totales de categoría
+  const visibleCategories = useMemo(() => {
+    const searchLower = search.trim().toLowerCase();
+    if (!searchLower) return Object.entries(groupedData);
+    return Object.entries(groupedData)
+      .map(([categoria, items]) => [
+        categoria,
+        items.filter(item =>
+          !item.producto_nombre.startsWith('Total') &&
+          item.producto_nombre.toLowerCase().includes(searchLower)
+        )
+      ])
+      .filter(([, items]) => items.length > 0);
+  }, [groupedData, search]);
+
+  // Resumen general del día
+  const summary = useMemo(() => {
+    const products = (data || []).filter(item => !item.producto_nombre.startsWith('Total'));
+    return [
+      { label: 'Categorías', value: Object.keys(groupedData).length, icon: FiLayers },
+      { label: 'Productos', value: products.length, icon: FiPackage },
+      {
+        label: 'Unidades',
+        value: products.reduce((sum, item) => sum + (Number(item.total_unidades) || 0), 0).toLocaleString(),
+        icon: FiBox
+      }
+    ];
+  }, [data, groupedData]);
 
   const handleUpdateQuantity = async (producto_id, total_unidades) => {
     try {
@@ -177,7 +207,7 @@ const ProductionConsolidated = () => {
 
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-0 sm:px-4 py-2 sm:py-6 max-w-6xl text-left">
 
       <Header 
         dateFilter={dateFilter}
@@ -190,20 +220,60 @@ const ProductionConsolidated = () => {
       {isLoading ? (
         <LoadingSpinner />
       ) : error ? (
-        <div className="bg-red-50 text-red-500 p-4 rounded-lg text-center">{error}</div>
+        <div className="bg-red-50 border border-red-100 text-red-800 p-4 rounded-lg text-center text-sm">{error}</div>
       ) : (
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 overflow-x-auto">
-          <div className="space-y-6 min-w-max">
-            {Object.entries(groupedData).map(([categoria, items]) => (
-              <CategoryTable 
-                key={categoria} 
-                categoria={categoria} 
-                items={items} 
-                onUpdateQuantity={handleUpdateQuantity}
-              />
+        <>
+          {/* Resumen del día */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4">
+            {summary.map(({ label, value, icon: Icon }) => (
+              <div key={label} className="bg-card rounded-lg border border-border shadow-soft p-2.5 sm:p-5">
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] sm:text-sm font-medium text-muted-foreground truncate">{label}</p>
+                  <div className="hidden sm:flex p-2 rounded-lg bg-primary/10">
+                    <Icon className="text-primary w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-xl sm:text-3xl font-display font-bold text-foreground mt-1 sm:mt-2">{value}</p>
+              </div>
             ))}
           </div>
-        </div>
+
+          {/* Búsqueda de productos */}
+          <div className="relative mb-4">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FiSearch className="text-muted-foreground" />
+            </div>
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar producto"
+              className="w-full pl-10 pr-3 py-2.5 text-sm rounded-lg border border-border bg-card shadow-soft focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+
+          {visibleCategories.length === 0 ? (
+            <div className="bg-card rounded-lg border border-border shadow-soft p-10 flex flex-col items-center text-center">
+              <div className="p-4 rounded-full bg-muted mb-3">
+                <FiInbox className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <p className="font-medium text-foreground">
+                {search ? 'Ningún producto coincide con la búsqueda' : 'No hay producción para esta fecha'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {visibleCategories.map(([categoria, items]) => (
+                <CategoryTable 
+                  key={categoria} 
+                  categoria={categoria} 
+                  items={items} 
+                  onUpdateQuantity={handleUpdateQuantity}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
