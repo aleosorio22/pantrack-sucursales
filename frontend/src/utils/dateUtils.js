@@ -31,3 +31,14 @@ export function shiftDate(dateString, days) {
   const [year, month, day] = dateString.split('-').map(Number);
   return formatDateForInput(new Date(Date.UTC(year, month - 1, day + days)));
 }
+
+// Formatea fecha y hora de un timestamp (ej. created_at) en hora local
+export function formatDateTime(value, long = false) {
+  if (!value) return 'No especificada';
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return 'No especificada';
+
+  return date.toLocaleString('es-GT', long
+    ? { day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' }
+    : { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+}

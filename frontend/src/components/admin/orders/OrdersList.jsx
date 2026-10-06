@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiChevronRight, FiUser, FiPackage, FiMapPin, FiInbox } from 'react-icons/fi';
+import { FiChevronRight, FiUser, FiPackage, FiMapPin, FiInbox, FiClock } from 'react-icons/fi';
+import { formatDateTime } from '../../../utils/dateUtils';
 
 // Color del indicador lateral según estado
 const STATUS_ACCENT = {
@@ -96,6 +97,12 @@ const OrdersList = ({ orders, isLoading, error, getStatusColor, onViewDetails, e
               <h3 className="font-semibold text-foreground truncate mt-1">
                 {order.cliente_nombre || 'Cliente sin nombre'}
               </h3>
+              {order.created_at && (
+                <p className="flex items-center text-xs text-muted-foreground mt-0.5">
+                  <FiClock className="mr-1 flex-shrink-0" size={12} />
+                  Creado {formatDateTime(order.created_at)}
+                </p>
+              )}
 
               <div className="flex items-center justify-between mt-2">
                 <div className="flex items-center gap-4 min-w-0 text-sm text-muted-foreground">
@@ -119,10 +126,11 @@ const OrdersList = ({ orders, isLoading, error, getStatusColor, onViewDetails, e
 
       {/* Vista desktop: tabla */}
       <div className="hidden md:block bg-card rounded-lg border border-border shadow-soft overflow-hidden">
-        <div className="grid grid-cols-[110px_1fr_1fr_120px_130px_32px] gap-4 px-5 py-3 bg-muted/60 border-b border-border text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <div className="grid grid-cols-[100px_1.2fr_1fr_150px_100px_130px_32px] gap-4 px-5 py-3 bg-muted/60 border-b border-border text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           <span>Pedido</span>
           <span>Cliente</span>
           <span>Sucursal</span>
+          <span>Creado</span>
           <span>Productos</span>
           <span>Estado</span>
           <span />
@@ -133,7 +141,7 @@ const OrdersList = ({ orders, isLoading, error, getStatusColor, onViewDetails, e
               key={order.id}
               to={`/admin/orders/${order.id}`}
               onClick={(e) => handleClick(e, order.id)}
-              className="group grid grid-cols-[110px_1fr_1fr_120px_130px_32px] gap-4 items-center px-5 py-3.5 text-sm hover:bg-muted/50 transition-colors"
+              className="group grid grid-cols-[100px_1.2fr_1fr_150px_100px_130px_32px] gap-4 items-center px-5 py-3.5 text-sm hover:bg-muted/50 transition-colors"
             >
               <span className="font-semibold text-foreground">#{order.id}</span>
               <span className="flex items-center min-w-0 text-foreground">
@@ -149,6 +157,10 @@ const OrdersList = ({ orders, isLoading, error, getStatusColor, onViewDetails, e
                 ) : (
                   <span>—</span>
                 )}
+              </span>
+              <span className="flex items-center text-muted-foreground whitespace-nowrap">
+                <FiClock className="mr-2 flex-shrink-0" size={14} />
+                {order.created_at ? formatDateTime(order.created_at) : '—'}
               </span>
               <span className="flex items-center text-muted-foreground">
                 <FiPackage className="mr-2 flex-shrink-0" size={14} />
